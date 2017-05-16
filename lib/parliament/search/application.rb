@@ -22,7 +22,7 @@ module Parliament
       helpers Sinatra::ContentFor
       helpers Parliament::Search::Helpers::PaginationHelper
 
-      # Register snatra modules
+      # Register sinatra modules
       register Sinatra::Namespace
       register Parliament::Search::Helpers::MultiView
 
@@ -35,24 +35,31 @@ module Parliament
         enable :logging
       end
 
-      # Setup Parliament Opensearch
-      begin
-        Parliament::Request::OpenSearchRequest.description_url = ENV['OPENSEARCH_DESCRIPTION_URL']
-      rescue Errno::ECONNREFUSED => e
-        raise StandardError, "There was an error getting the description file from OPENSEARCH_DESCRIPTION_URL environment variable value: '#{ENV['OPENSEARCH_DESCRIPTION_URL']}' - #{e.message}"
+      def self.setup_opensearch_description!
+        # Setup Parliament Opensearch
+        begin
+          Parliament::Request::OpenSearchRequest.description_url = ENV['OPENSEARCH_DESCRIPTION_URL']
+
+        rescue Errno::ECONNREFUSED => e
+
+          raise StandardError, "There was an error getting the description file from OPENSEARCH_DESCRIPTION_URL environment variable value: '#{ENV['OPENSEARCH_DESCRIPTION_URL']}' - #{e.message}"
+        end
       end
 
       before do
         uri = env['REQUEST_URI']
-
         if uri && uri[uri.length-1] != '/' && env['PATH_INFO'] == ''
           puts 'Redirecting to add a trailing slash'
+
           redirect uri + '/'
         end
+
       end
 
       get '/' do
         @query_parameter = params[:q] || nil
+
+
 
         # Show the index page if there is no query passed
         return show 'search/index' unless @query_parameter
@@ -82,6 +89,8 @@ module Parliament
           show 'search/no_results'
         end
       end
+
+      setup_opensearch_description!
 
       run! if app_file == $PROGRAM_NAME
     end

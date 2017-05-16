@@ -22,9 +22,6 @@ gem 'pugin', '0.6.3'
 # Use i18n for translations
 gem 'i18n'
 
-# Use dotenv to override environment variables
-gem 'dotenv'
-
 group :development do
   gem 'shotgun'
 end

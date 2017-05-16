@@ -8,7 +8,5 @@ module Parliament
   module Search
     autoload :VERSION, 'parliament/search/version'
     autoload :Application, 'parliament/search/application'
-
-    require 'dotenv'
   end
 end
