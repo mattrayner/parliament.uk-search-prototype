@@ -2,13 +2,22 @@ require 'simplecov'
 SimpleCov.start
 
 require 'rack/test'
+require 'webmock'
 require 'webmock/rspec'
 require 'vcr'
-require File.join(File.dirname(__FILE__), '..', 'search.rb')
-require File.join(File.dirname(__FILE__), '..', 'helpers/pagination.rb')
+
+# Setup the initial description file request
+WebMock.stub_request(:get, ENV['OPENSEARCH_DESCRIPTION_URL']).
+  to_return(:status => 200, :body => "<?xml version=\"1.0\"?>\r\n<OpenSearchDescription xmlns=\"http://a9.com/-/spec/opensearch/1.1/\">\r\n
+  \ <ShortName>os test</ShortName>\r\n  <Description>test for os</Description>\r\n
+  \ <Url template=\"https://api20170418155059.azure-api.net/search/?q={searchTerms}&amp;start={startPage?}\"
+        type=\"application/atom+xml\" />\r\n</OpenSearchDescription>", :headers => {})
+
+require File.join(File.dirname(__FILE__), '..', 'lib', 'parliament', 'search.rb')
+require File.join(File.dirname(__FILE__), '..', 'lib', 'parliament', 'search', 'helpers', 'pagination.rb')
 
 def app
-  Search.new
+  Parliament::Search::Application.new
 end
 
 VCR.configure do |config|
@@ -127,5 +136,4 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
-
 end

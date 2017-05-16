@@ -1,23 +1,43 @@
-= haml :'search/search_box'
+- content_for :title do
+  Results - Search
 
-%p= "About #{@results_total} results"
+.section--primary
+  .container
+    %h1 
+      Search results for 
+      %span.sr-only &ldquo;#{@query_parameter}&rdquo;
 
-%ul.list
-  - @results.entries.each do |entry|
-    %li.list__item
-      %a{ :href => "#{entry.url}" }= entry.title
-      %p= entry.url
-      %p= entry.summary
+    = partial 'search/search_box'
 
-%ul
-  - unless current_page == 1
-    %li
-      %a{ :href => "/search?q=#{@query_parameter}&start_page=#{start_page(previous_page)}" } Previous
+    %p= "About #{@results_total} results"
 
-  - page_range.each do |page|
-    %li
-      %a{ :href => "/search?q=#{@query_parameter}&start_page=#{start_page(page)}" }= page
+- if @results_total.to_i >= 1
+  %section#content
+    .container
+      %ol.list--box
+        - @results.entries.each do |entry|
+          %li
+            %a{ href: "#{entry.url}" }= entry.title
+            %p{ style: 'word-wrap: break-word;' }= entry.url
+            %p= entry.summary
 
-  - unless current_page == last_page
-    %li
-      %a{ :href => "/search?q=#{@query_parameter}&start_page=#{start_page(next_page)}" } Next
+%section
+  .container
+    - if @results_total.to_i >= 1
+      %nav.navigation--number{ aria:{ label: 'Pagination' } }
+        - unless current_page == 1
+          %a.navigation-control--left{ href: "/search/?q=#{@query_parameter}&start_page=#{start_page(previous_page)}" } Previous
+
+        - unless current_page == last_page
+          %a.navigation-control--right{ href: "/search/?q=#{@query_parameter}&start_page=#{start_page(next_page)}" } Next
+
+        %ol
+          - page_range.each do |page|
+            %li{ class: ('active' if (page == current_page)), 'data-number': page }
+              - unless page == current_page
+                %a{ href: "/search/?q=#{@query_parameter}&start_page=#{start_page(page)}" }= page
+              - else
+                %span= current_page
+    - else
+      .highlight--box.highlight--caution__soft
+        %p= "There are no results for your search."
